@@ -8,7 +8,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 app = FastAPI()
 
-GROQ_API_URL = "https://api.groq.com/v1/chat/completions"
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 @app.post("/chat/")
 def chat_with_bot(user_query:dict):
@@ -30,7 +30,7 @@ def chat_with_bot(user_query:dict):
     response = requests.post(GROQ_API_URL, json=payload, headers=headers)
 
     if response.status_code == 200:
-        bot_reply = response.json()["choice"][0]["message"]["content"]
+        bot_reply = response.json()["choices"][0]["message"]["content"]
         return {
             "response": bot_reply
         }
