@@ -1,7 +1,17 @@
 import os
 import requests
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer
 from fastapi import FastAPI
 from dotenv import load_dotenv
+
+dataset = load_dataset("altaidevorg/women-health-mini")
+
+conversation_data = [conv["content"] for conv in dataset["train"]]
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+conversation_embeddings = model.encode(conversation_data)
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
