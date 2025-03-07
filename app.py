@@ -26,3 +26,7 @@ def chat_with_bot(user_query:dict):
         "model": "llama3-70b-8192",  
         "messages": [{"role": "user", "content": prompt}]
     }
+
+    response = requests.post(GROQ_API_URL, json=payload, headers=headers)
+
+    
