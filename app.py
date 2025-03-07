@@ -30,4 +30,14 @@ def chat_with_bot(user_query:dict):
     response = requests.post(GROQ_API_URL, json=payload, headers=headers)
 
     if response.status_code == 200:
-          
+        bot_reply = response.json()["choice"][0]["message"]["content"]
+        return {
+            "response": bot_reply
+        }
+
+    else:
+        return "error in fetching the data from groq AI"
+
+if __name__ == "__main__" :
+     import uvicorn
+     uvicorn.run(app, host="0.0.0.0", port=8000)
