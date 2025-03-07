@@ -1,10 +1,13 @@
 import os
 import requests
+import pandas as pd
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+df = pd.read_json("hf://datasets/altaidevorg/women-health-mini/women-health-mini.jsonl", lines=True)
 
 app = FastAPI()
 
