@@ -2,6 +2,7 @@ import os
 import requests
 from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
+import numpy as np
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
@@ -20,12 +21,22 @@ app = FastAPI()
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+def get_more_relevant_rsponse(query):
+    query_embedding = model.encode([query])
+    similarities = np.dot(conversation_embeddings, query_embedding.T).flatten()
+    best_match_idx = np.argmax(similarities)
+    return conversation_data[best_match_idx]
+
 @app.post("/chat/")
 def chat_with_bot(user_query:dict):
     prompt = user_query.get("message", "")
 
     if not prompt :
         return "Prompt is required!"
+    
+    history_response = get_more_relevant_rsponse(prompt)
+
+    context_prompt = f"User: {prompt}\n\nPreviously discussed:\n{history_response}"
     
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
