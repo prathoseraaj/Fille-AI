@@ -1,20 +1,23 @@
 import os
 import requests
 import pandas as pd
+from datasets import load_dataset
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-df = pd.read_json("hf://datasets/altaidevorg/women-health-mini/women-health-mini.jsonl", lines=True)
+dataset = load_dataset("altaidevorg/women-health-mini")
+df = pd.DataFrame(dataset["train"])
+
 
 app = FastAPI()
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 def search_csv(questions):
-    for _, row in df.iterrows:
+    for _, row in df.iterrows():
         if questions.lower() in row['Question'].lower():
             return row['answer']
     return None
@@ -24,7 +27,13 @@ def chat_with_bot(user_query:dict):
     prompt = user_query.get("message", "")
 
     if not prompt :
-        return "Prompt is required!"
+        return "Message is required!"
+    
+    csv_answer = search_csv(prompt)
+    if csv_answer:
+        return {
+            "response": csv_answer
+        }
     
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
