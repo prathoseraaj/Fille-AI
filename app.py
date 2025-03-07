@@ -16,4 +16,13 @@ def chat_with_bot(user_query:dict):
 
     if not prompt :
         return "Prompt is required!"
-      
+    
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "llama3-70b-8192",  
+        "messages": [{"role": "user", "content": prompt}]
+    }
