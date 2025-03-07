@@ -13,6 +13,12 @@ app = FastAPI()
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+def search_csv(questions):
+    for _, row in df.iterrows:
+        if questions.lower() in row['Question'].lower():
+            return row['answer']
+    return None
+
 @app.post("/chat/")
 def chat_with_bot(user_query:dict):
     prompt = user_query.get("message", "")
