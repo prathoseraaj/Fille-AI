@@ -8,7 +8,11 @@ from dotenv import load_dotenv
 
 dataset = load_dataset("altaidevorg/women-health-mini")
 
-conversation_data = [conv["content"] for conv in dataset["train"]]
+conversation_data = [
+    turn["content"]
+    for conv in dataset["train"]
+    for turn in conv["conversations"]
+]
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
@@ -36,7 +40,17 @@ def chat_with_bot(user_query:dict):
     
     history_response = get_more_relevant_rsponse(prompt)
 
-    context_prompt = f"User: {prompt}\n\nPreviously discussed:\n{history_response}"
+    context_prompt = f"""
+    You are a chatbot specialized in women's health. Provide **clear, factual, and supportive** responses. 
+    If the user's question involves medical advice, remind them to consult a healthcare professional.  
+
+    User Question: {prompt}
+
+    Previously Discussed Context:
+    {history_response}
+
+    Please provide a professional, friendly, and informative response.
+    """
     
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -45,7 +59,7 @@ def chat_with_bot(user_query:dict):
 
     payload = {
         "model": "llama3-70b-8192",  
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": [{"role": "user", "content": context_prompt}]
     }
 
     response = requests.post(GROQ_API_URL, json=payload, headers=headers)
