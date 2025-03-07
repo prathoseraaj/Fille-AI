@@ -29,4 +29,5 @@ def chat_with_bot(user_query:dict):
 
     response = requests.post(GROQ_API_URL, json=payload, headers=headers)
 
-    
+    if response.status_code == 200:
+          
