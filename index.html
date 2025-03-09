@@ -1,75 +1,823 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👩‍⚕️Femora AI- Women's Health Assistant</title>
-    <link rel="stylesheet" href="style.css">
-    
-</head>
-<body>
-    <header>
-        <div class="logo">
-            <div class="logo-icon">F</div>
-            <span class="logo-text">Femora</span>
-        </div>
-        <nav>
-            <a href="#">Home</a>
-            <a href="#">Feature</a>
-            <a href="#">About</a>
-            <a href="#">Contact</a>
-        </nav>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Women's Health Chatbot</title>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Markdown parser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        background-color: #1A1C25;
+        font-family: 'Outfit', sans-serif;
+      }
 
-    <main>
-        <div class="hero">
-            <h1>Meet Femora - Your Personal Health Assistant</h1>
-            <p class="subtitle">A specialized AI assistant designed to provide guidance, support, and reliable information on women's health and wellness.</p>
-        </div> 
+      .main-content {
+        justify-content: space-between;
+        display: flex;
+        height: 92vh;
+        flex-direction: column;
+      }
 
-        <div class="chat-container">
-            <div class="chat-header">
-                <div class="assistant-avatar">F</div>
-                <h2>Femora</h2>
-            </div> 
+      .center-content {
+        display: flex;
+        color: white;
+        font-family: outfit;
+        margin-top: 150px;
+        place-items: center;
+        flex-direction: column;
+        width: 100%;
+        transition: margin-top 0.5s ease;
+        position: relative;
+      }
 
-            <div class="chat-messages" id="chat-messages">
-                <div class="message assistant-message">
-                    Hello! I'm Femora, your personal women's health assistant. How can I help you today?
-                </div>
+      .center-content.searched {
+        margin-top: 20px;
+        justify-content: flex-start;
+      }
 
-                <div class="chat-input">
-                    <input type="text" id="user-input" placeholder="Type your message here...">
-                    <button id="send-button">Send</button>
-                </div>
-            </div>
-            
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">🩺</div>
-                    <h3>Health Information</h3>
-                    <p>Access reliable and up-to-date information on women's health topics, from reproductive health to nutrition and fitness.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Private & Secure</h3>
-                    <p>Your conversations are private and secure. We prioritize your data privacy and maintain strict confidentiality.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">👩‍⚕️</div>
-                    <h3>Expert-Backed</h3>
-                    <p>Our responses are informed by medical research and reviewed by healthcare professionals specializing in women's health.</p>
-                </div>
-            </div>
-        </main>
+      .content-welcome-sentence {
+        display: grid;
+        place-items: center;
+        transition: opacity 0.3s ease;
+      }
+
+      .textarea-container {
+        display: flex;
+        align-items: center;
+        width: 60%;
+        margin-top: 20px;
+        background-color: #24273A;
+        border-radius: 10px;
+        padding-right: 10px;
+        transition: all 0.5s ease;
+      }
+      .textarea-container.bottom-position {
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    bottom: 80px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+
+}
+      .search-input {
+        resize: none;
+        font-family: Outfit, sans-serif;
+        padding: 15px;
+        flex: 1;
+        background-color: #24273A;
+        border: none;
+        color: white;
+        caret-color: white;
+        font-size: 17px;
+        text-align: start;
+        scrollbar-width: none;
+        outline: none;
+        border-radius: 10px 0 0 10px;
+        min-height: 25px;
+        max-height: 100px;
+      }
+
+      .search-button {
+        font-size: 25px;
+        color: rgb(255, 123, 0);
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 10px;
+        border-radius: 0 10px 10px 0;
+      }
+
+      .search-button:hover {
+        color: #bbb;
+      }
+
+      .conversation-container {
+        display: flex;
+        flex-direction: column;
+        width: 80%;
+        margin-bottom: 20px;
+        overflow-y: auto;
+        max-height: calc(100vh - 250px);
+        scrollbar-width: none;
+      }
+
+      .message {
+        margin-bottom: 15px;
+        display: flex;
+        width: 100%;
+      }
+
+      .user-message {
+        justify-content: flex-end;
+        font-size: 20px;
+      }
+
+      .computer-message {
+        justify-content: flex-start;
+        font-size: 20px;
+      }
+
+      .message-bubble {
+        padding: 10px 15px;
+        border-radius: 15px;
+        max-width: 70%;
+      }
+
+      .user-message .message-bubble {
+        background-color: #24273A;
+        color: white;
+        border-top-right-radius: 5px;
+      }
+
+      .computer-message .message-bubble {
+        background-color: #1A1C25;
+        color: white;
+        border-top-left-radius: 5px;
+      }
+
+      /* Markdown content styles */
+      .markdown-content {
+        font-family: Outfit, sans-serif;
+        line-height: 1.5;
+        color: white;
+        width: 100%;
+      }
+      
+      /* Headings */
+      .markdown-content h1,
+      .markdown-content h2,
+      .markdown-content h3,
+      .markdown-content h4,
+      .markdown-content h5,
+      .markdown-content h6 {
+        margin-top: 0.5em;
+        margin-bottom: 0.3em;
+        font-weight: 600;
+      }
+      
+      .markdown-content h1 {
+        font-size: 1.4em;
+      }
+      
+      .markdown-content h2 {
+        font-size: 1.3em;
+      }
+      
+      .markdown-content h3 {
+        font-size: 1.2em;
+      }
+      
+      /* Paragraphs and spacing */
+      .markdown-content p {
+        margin-bottom: 0.5em;
+      }
+      
+      .markdown-content p:last-child {
+        margin-bottom: 0;
+      }
+      
+      /* Lists */
+      .markdown-content ul,
+      .markdown-content ol {
+        padding-left: 1.5em;
+        margin-bottom: 0.5em;
+        margin-top: 0.5em;
+      }
+      
+      .markdown-content li {
+        margin-bottom: 0.2em;
+      }
+
+      .conversation-container {
+  scroll-behavior: smooth;
+}
+      
+      /* Code blocks */
+      .markdown-content pre {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+        padding: 0.5em;
+        margin: 0.5em 0;
+        overflow-x: auto;
+      }
+      
+      .markdown-content code {
+        font-family: monospace;
+        background-color: rgba(0, 0, 0, 0.3);
+        padding: 0.1em 0.3em;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+      
+      .markdown-content pre code {
+        background-color: transparent;
+        padding: 0;
+      }
+      
+      /* Links */
+      .markdown-content a {
+        color: #fff;
+        text-decoration: underline;
+      }
+      
+      /* Blockquotes */
+      .markdown-content blockquote {
+        border-left: 3px solid rgba(255, 255, 255, 0.5);
+        padding-left: 0.8em;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+      }
+
+      /* Code block container with header */
+      .code-block-container {
+        position: relative;
+        margin: 10px 0;
+        border-radius: 6px;
+        overflow: hidden;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      
+      .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .code-language {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      .copy-button {
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+      
+      .copy-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      /* Larger code text */
+      .computer-message .message-bubble pre {
+        background-color: transparent;
+        padding: 0;
+        margin: 0;
+        overflow-x: auto;
+      }
+      
+      .computer-message .message-bubble .code-block {
+        padding: 12px;
+        margin: 0;
+        overflow-x: auto;
+      }
+      
+      .computer-message .message-bubble code {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 14px; /* Increased font size */
+        line-height: 1.5;
+        background-color: rgba(0, 0, 0, 0.2);
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+      
+      .computer-message .message-bubble pre code {
+        background-color: transparent;
+        padding: 0;
+        display: block;
+        font-size: 14px; /* Larger code font size */
+        white-space: pre-wrap;
+      }
+      
+      /* Improve general markdown styling */
+      .computer-message .message-bubble h1,
+      .computer-message .message-bubble h2,
+      .computer-message .message-bubble h3,
+      .computer-message .message-bubble h4,
+      .computer-message .message-bubble h5,
+      .computer-message .message-bubble h6 {
+        margin-top: 0.8em;
+        margin-bottom: 0.5em;
+        font-weight: 600;
+      }
+      
+      .computer-message .message-bubble h1 {
+        font-size: 1.5em;
+      }
+      
+      .computer-message .message-bubble h2 {
+        font-size: 1.4em;
+      }
+      
+      .computer-message .message-bubble h3 {
+        font-size: 1.3em;
+      }
+      
+      /* Paragraphs and spacing */
+      .computer-message .message-bubble p {
+        margin-bottom: 0.7em;
+        line-height: 1.5;
+      }
+      
+      .computer-message .message-bubble p:last-child {
+        margin-bottom: 0;
+      }
+      
+      /* Lists */
+      .computer-message .message-bubble ul,
+      .computer-message .message-bubble ol {
+        padding-left: 1.8em;
+        margin-bottom: 0.8em;
+        margin-top: 0.8em;
+      }
+      
+      .computer-message .message-bubble li {
+        margin-bottom: 0.4em;
+      }
+      
+      /* Links */
+      .computer-message .message-bubble a {
+        color: #fff;
+        text-decoration: underline;
+      }
+      
+      /* Blockquotes */
+      .computer-message .message-bubble blockquote {
+        border-left: 4px solid rgba(255, 255, 255, 0.5);
+        padding-left: 1em;
+        margin: 0.8em 0;
+        font-style: italic;
+      }
+      
+      /* Loading animation */
+      .loading .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: white;
+        margin: 0 3px;
+        animation: dotPulse 1.5s infinite ease-in-out;
+      }
+      
+      .loading .dot:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+      
+      .loading .dot:nth-child(3) {
+        animation-delay: 0.6s;
+      }
+      
+      .navbar{
+        color: rgb(255, 255, 255);
+        font-family: Outfit, sans-serif;
+        padding-left: 20px;
+        font-size: 17px;
         
-        <footer>
-            <p>© 2025 Femora.AI. All rights reserved. | Privacy Policy | Terms of Service</p>
-        </footer>
+      }
 
+      .h3suii{
+        margin-top: -10px;
+      }
 
-    </main>
-</body>
+      .ppp{
+        color: grey;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+      }
+
+      .maindiv{
+        height: 92vh;
+      }
+      
+      @keyframes dotPulse {
+        0%, 100% {
+          opacity: 0.4;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2);
+        }
+      }
+
+      /* Optional: cursor animation for typing effect */
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+
+      .typing-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 20px;
+        background-color: white;
+        margin-left: 2px;
+        animation: blink 1s infinite;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="maindiv">
+    <nav class="navbar">
+        <h3> FILLE AI </h3>
+    </nav>
+    <div>
+      <div class="main-content">
+        <div class="center-content">
+          <div class="content-welcome-sentence">
+            <h1>Hello, GIRL!</h1>
+            <h3 class="h3suii">Ready to share your poblems and feelings today?</h3>
+          </div>
+
+          <div class="conversation-container" style="display: none">
+            <!-- Messages will be added here dynamically -->
+          </div>
+
+          <div class="textarea-container">
+            <textarea
+              class="search-input"
+              placeholder="What's my need !?"
+            ></textarea>
+            <i class="fas fa-arrow-circle-right search-button"></i>
+          </div>
+        </div>
+        <div class="footer">
+          <!-- Footer content here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Template for user message -->
+    <template id="user-message-template">
+      <div class="message user-message">
+        <div class="message-bubble">
+          <!-- Text will be inserted here -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Template for computer message -->
+    <template id="computer-message-template">
+      <div class="message computer-message">
+        <div class="message-bubble">
+          <!-- Markdown text will be inserted here -->
+        </div>
+      </div>
+    </template>
+
+    <!-- Template for loading message -->
+    <template id="loading-template">
+      <div class="message computer-message">
+        <div class="message-bubble loading">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </template>
+
+    <!-- Template for code block -->
+    <template id="code-block-template">
+      <div class="code-block-container">
+        <div class="code-header">
+          <span class="code-language"></span>
+          <button class="copy-button">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        <pre class="code-block"><code></code></pre>
+      </div>
+    </template>
+</div>
+    <footer>
+        <p class="ppp"> Fille AI is not infallible. Gasp! Cross-check significant information!</p>
+    </footer>
+
+    <script>
+
+        
+      document.addEventListener("DOMContentLoaded", function () {
+        // Elements
+        const centerContent = document.querySelector(".center-content");
+        const welcomeMessage = document.querySelector(
+          ".content-welcome-sentence"
+        );
+        const conversationContainer = document.querySelector(
+          ".conversation-container"
+        );
+        const textareaContainer = document.querySelector(".textarea-container");
+        const searchInput = document.querySelector(".search-input");
+        const searchButton = document.querySelector(".search-button");
+        const userMessageTemplate = document.getElementById(
+          "user-message-template"
+        );
+        const computerMessageTemplate = document.getElementById(
+          "computer-message-template"
+        );
+        const loadingTemplate = document.getElementById("loading-template");
+
+        // State variables
+        let isSearchSubmitted = false;
+        let isLoading = false;
+
+        // Helper function to decode HTML entities
+        function decodeHTML(html) {
+          if (!html || typeof html !== 'string') return '';
+          const textArea = document.createElement('textarea');
+          textArea.innerHTML = html;
+          return textArea.value;
+        }
+
+        // Function to scroll to bottom of conversation
+        function scrollToBottom() {
+          conversationContainer.scrollTop = conversationContainer.scrollHeight;
+        }
+
+        // Function to type message character by character
+        function typeMessage(element, text, index = 0, speed = 15) {
+  // First decode any HTML entities in the text
+  const decodedText = decodeHTML(text);
+  
+  if (index < decodedText.length) {
+    // Handle HTML tags and code blocks specially
+    if (decodedText.substring(index - 6, index) === '<code>') {
+      // If we're starting a code block, find where it ends and add it all at once
+      const endCodeIndex = decodedText.indexOf('</code>', index);
+      if (endCodeIndex !== -1) {
+        const codeChunk = decodedText.substring(index - 6, endCodeIndex + 7);
+        element.innerHTML += codeChunk;
+        index = endCodeIndex + 7;
+      }
+    } else if (decodedText.substring(index - 4, index) === '<pre') {
+      // For pre tags, find the closing tag and add it all at once
+      const endPreIndex = decodedText.indexOf('</pre>', index);
+      if (endPreIndex !== -1) {
+        const preChunk = decodedText.substring(index - 4, endPreIndex + 6);
+        element.innerHTML += preChunk;
+        index = endPreIndex + 6;
+      }
+    } else if (decodedText.charAt(index) === '<') {
+      // For HTML tags, add the entire tag at once
+      const endTagIndex = decodedText.indexOf('>', index);
+      if (endTagIndex !== -1) {
+        element.innerHTML += decodedText.substring(index, endTagIndex + 1);
+        index = endTagIndex + 1;
+      }
+    } else {
+      // Add one character at a time for regular text
+      element.innerHTML += decodedText.charAt(index);
+      index++;
+    }
+    
+    // Scroll to bottom with each character added
+    scrollToBottom();
+    
+    // Schedule the next character
+    setTimeout(() => typeMessage(element, decodedText, index, speed), speed);
+  } else {
+    // Typing complete
+    // Remove cursor if it exists
+    const cursor = element.querySelector('.typing-cursor');
+    if (cursor) cursor.remove();
+    
+    // Initialize any code blocks that were added
+    document.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightBlock(block);
+    });
+    
+    // Add copy functionality to any code blocks
+    document.querySelectorAll('.copy-button').forEach(button => {
+      if (!button.hasListener) {
+        button.addEventListener('click', function() {
+          const codeBlock = this.closest('.code-block-container').querySelector('code');
+          navigator.clipboard.writeText(codeBlock.textContent);
+          const icon = this.querySelector('i');
+          icon.className = 'fas fa-check';
+          setTimeout(() => {
+            icon.className = 'fas fa-copy';
+          }, 2000);
+        });
+        button.hasListener = true;
+      }
+    });
+    
+    // Final scroll to ensure everything is visible
+    scrollToBottom();
+  }
+}
+        // Function to format code blocks with copy button
+        function formatMessage(text) {
+          // Configure marked options to use highlight.js
+          marked.setOptions({
+            highlight: function (code, language) {
+              if (language && hljs.getLanguage(language)) {
+                return hljs.highlight(code, { language: language }).value;
+              }
+              return hljs.highlightAuto(code).value;
+            },
+          });
+
+          // Custom renderer for code blocks
+          const renderer = new marked.Renderer();
+          
+          renderer.code = function (code, language) {
+            const codeBlockTemplate = document
+              .getElementById("code-block-template")
+              .content.cloneNode(true);
+            const codeBlock = codeBlockTemplate.querySelector("code");
+            const codeLanguage =
+              codeBlockTemplate.querySelector(".code-language");
+            const copyButton = codeBlockTemplate.querySelector(".copy-button");
+
+            if (language) {
+              codeLanguage.textContent = language;
+              codeBlock.className = `language-${language}`;
+            }
+
+            codeBlock.textContent = code;
+
+            // Convert to HTML string
+            const div = document.createElement("div");
+            div.appendChild(codeBlockTemplate);
+            return div.innerHTML;
+          };
+
+          marked.setOptions({ renderer });
+
+          return marked.parse(text);
+        }
+
+        // Function to add message to conversation
+        function addMessage(type, text) {
+          const template =
+            type === "user" ? userMessageTemplate : computerMessageTemplate;
+          const messageElement = template.content.cloneNode(true);
+          const messageBubble = messageElement.querySelector(".message-bubble");
+
+          if (type === "user") {
+            messageBubble.textContent = text;
+            conversationContainer.appendChild(messageElement);
+            scrollToBottom();
+          } else {
+            // For AI responses, use typing effect
+            // First format the markdown
+            const formattedText = formatMessage(text);
+            
+            // Add message with empty content and a cursor
+            messageBubble.innerHTML = '<span class="typing-cursor"></span>';
+            conversationContainer.appendChild(messageElement);
+            scrollToBottom();
+            
+            // Start typing effect after a short delay
+            setTimeout(() => {
+              messageBubble.innerHTML = ''; // Clear including cursor
+              typeMessage(messageBubble, formattedText);
+            }, 200);
+          }
+        }
+
+        // Function to add loading indicator
+        function addLoadingIndicator() {
+          const loadingElement = loadingTemplate.content.cloneNode(true);
+          loadingElement.querySelector(".loading").id = "loading-indicator";
+          conversationContainer.appendChild(loadingElement);
+          scrollToBottom();
+        }
+
+        // Function to remove loading indicator
+        function removeLoadingIndicator() {
+          const loadingIndicator = document.getElementById("loading-indicator");
+          if (loadingIndicator) {
+            loadingIndicator.parentElement.remove();
+          }
+        }
+
+        // Function to handle search submit
+        async function handleSearchSubmit() {
+          const userMessage = searchInput.value.trim();
+
+          if (userMessage !== "" && !isLoading) {
+            // Add user message to chat
+            addMessage("user", userMessage);
+
+            // Show conversation if this is the first message
+            if (!isSearchSubmitted) {
+              isSearchSubmitted = true;
+              centerContent.classList.add("searched");
+              welcomeMessage.style.display = "none";
+              conversationContainer.style.display = "block";
+              textareaContainer.classList.add("bottom-position");
+            }
+
+            // Clear input and set loading state
+            searchInput.value = "";
+            isLoading = true;
+            searchButton.style.opacity = "0.5";
+            searchButton.style.cursor = "not-allowed";
+            addLoadingIndicator();
+
+            try {
+              // Send request to server
+              const response = await fetch("http://localhost:8000/chat/", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify({ message: userMessage }),
+              });
+
+              if (!response.ok) {
+                throw new Error(`Failed to get response: ${response.status}`);
+              }
+
+              const data = await response.json();
+
+              // Add AI response to chat
+              removeLoadingIndicator();
+              
+              // Make sure the response is properly decoded
+              const aiResponse = typeof data.response === 'string' 
+                ? data.response
+                : JSON.stringify(data.response);
+                
+              addMessage("computer", aiResponse);
+            } catch (error) {
+              console.error("Error:", error);
+              // Add error message
+              removeLoadingIndicator();
+              addMessage(
+                "computer",
+                "Sorry, there was an error processing your request."
+              );
+            } finally {
+              isLoading = false;
+              searchButton.style.opacity = "1";
+              searchButton.style.cursor = "pointer";
+            }
+          }
+        }
+
+        // Auto-resize textarea as user types
+        searchInput.addEventListener('input', function() {
+          this.style.height = 'auto';
+          this.style.height = (this.scrollHeight) + 'px';
+          // Cap at max-height defined in CSS
+          if (this.scrollHeight > parseInt(window.getComputedStyle(this).maxHeight)) {
+            this.style.overflowY = 'auto';
+          } else {
+            this.style.overflowY = 'hidden';
+          }
+        });
+
+        // Event listeners
+        searchButton.addEventListener("click", handleSearchSubmit);
+
+        searchInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSearchSubmit();
+          }
+        });
+
+        // Optional: Add initial greeting message
+        // setTimeout(() => {
+        //   addMessage("computer", "Hello! How can I help you today?");
+        // }, 1000);
+      });
+    </script>
+  </body>
 </html>
+

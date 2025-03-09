@@ -35,7 +35,11 @@ conversation_embeddings = model.encode(conversation_data)
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+conversation_history = {}
 
+class UserQuery(BaseModel):
+    message: str
+    user_id: str = "default_user" 
 
 def get_more_relevant_rsponse(query):
     query_embedding = model.encode([query])
@@ -46,17 +50,29 @@ def get_more_relevant_rsponse(query):
 @app.post("/chat/")
 async def chat_with_bot(user_query:dict):
     prompt = user_query.get("message", "")
+    user_id = user_query.get("user_id", "default_user")
 
     if not prompt :
         return {"response": "Prompt is required!"}
     
+    if user_id not in conversation_history:
+        conversation_history[user_id] = []
+    
     history_response = get_more_relevant_rsponse(prompt)
+
+    history_context = ""
+    if conversation_history[user_id]:
+        history_context = "Previous conversation:\n"
+        for msg in conversation_history[user_id][-5:]:  
+            history_context += f"{msg}\n"
 
     context_prompt = f"""
     You are a chatbot named fille AI specialized in women's health  . Provide **clear, factual, and supportive** responses. 
     If the user's question involves medical advice, remind them to consult a healthcare professional.  
 
     User Question: {prompt}
+
+    {history_context}
 
     Previously Discussed Context:
     {history_response}
@@ -78,6 +94,9 @@ async def chat_with_bot(user_query:dict):
 
     if response.status_code == 200:
         bot_reply = response.json()["choices"][0]["message"]["content"]
+        conversation_history[user_id].append(f"User: {prompt}")
+        conversation_history[user_id].append(f"Fille AI: {bot_reply}")
+        
         return {
             "response": bot_reply
         }
