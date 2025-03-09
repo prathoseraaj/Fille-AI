@@ -41,7 +41,7 @@ def chat_with_bot(user_query:dict):
     history_response = get_more_relevant_rsponse(prompt)
 
     context_prompt = f"""
-    You are a chatbot specialized in women's health. Provide **clear, factual, and supportive** responses. 
+    You are a chatbot named fille AI specialized in women's health  . Provide **clear, factual, and supportive** responses. 
     If the user's question involves medical advice, remind them to consult a healthcare professional.  
 
     User Question: {prompt}
