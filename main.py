@@ -4,7 +4,22 @@ from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from dotenv import load_dotenv
+
+load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 dataset = load_dataset("altaidevorg/women-health-mini")
 
@@ -18,12 +33,9 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 conversation_embeddings = model.encode(conversation_data)
 
-load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-app = FastAPI()
-
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+
 
 def get_more_relevant_rsponse(query):
     query_embedding = model.encode([query])
@@ -32,11 +44,11 @@ def get_more_relevant_rsponse(query):
     return conversation_data[best_match_idx]
 
 @app.post("/chat/")
-def chat_with_bot(user_query:dict):
+async def chat_with_bot(user_query:dict):
     prompt = user_query.get("message", "")
 
     if not prompt :
-        return "Prompt is required!"
+        return {"response": "Prompt is required!"}
     
     history_response = get_more_relevant_rsponse(prompt)
 
@@ -71,7 +83,7 @@ def chat_with_bot(user_query:dict):
         }
 
     else:
-        return "error in fetching the data from groq AI"
+        return {"response": "Error in fetching the data from groq AI"}
 
 if __name__ == "__main__" :
      import uvicorn
