@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],  
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,15 +52,15 @@ async def chat_with_bot(user_query:dict):
     history_response = get_more_relevant_rsponse(prompt)
 
     context_prompt = f"""
-    You are a chatbot named fille AI specialized in women's health  . Provide **clear, factual, and supportive** responses. 
-    If the user's question involves medical advice, remind them to consult a healthcare professional.  
+            You are a chatbot named fille AI specialized in women's health. Provide **clear, factual, and supportive** responses. 
+            If the user's question involves medical advice, remind them to consult a healthcare professional.  
 
-    User Question: {prompt}
+            User Question: {prompt}
 
-    Previously Discussed Context:
-    {history_response}
+            Below is a similar question/response from the knowledge base that may contain helpful information:
+            {history_response}
 
-    Please provide a professional, friendly, and informative response.
+            Please provide your own professional, friendly, and informative response that addresses the user's specific question.
     """
     
     headers = {
