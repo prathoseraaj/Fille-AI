@@ -29,7 +29,7 @@ conversation_data = [
     for turn in conv["conversations"]
 ]
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
 
 conversation_embeddings = model.encode(conversation_data)
 
