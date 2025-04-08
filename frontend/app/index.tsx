@@ -286,7 +286,7 @@ const FilleAI = () => {
 
     try {
       // Send request to server
-      const response = await fetch("http://192.168.205.117:8000/chat/", {
+      const response = await fetch("http://192.168.205.117:8000/chat/",  {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
