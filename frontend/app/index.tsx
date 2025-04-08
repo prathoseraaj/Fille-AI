@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import "./global.css"
 import {
   View,
   Text,
@@ -21,25 +22,20 @@ import { marked } from 'marked';
 import highlightjs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
-import { useFonts } from 'expo-font';
 
 // Register commonly used languages
 highlightjs.registerLanguage('javascript', javascript);
 highlightjs.registerLanguage('python', python);
 
 const FilleAI = () => {
-  // Load custom fonts
-  const [fontsLoaded] = useFonts({
-    'Outfit-Regular': require('./assets/fonts/Outfit-Regular.ttf'),
-    'Outfit-Bold': require('./assets/fonts/Outfit-Bold.ttf'),
-  });
-
+  // Removed custom font loading
+  
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<{ type: string; text: string }[]>([]);
   const [inputText, setInputText] = useState('');
   const [inputHeight, setInputHeight] = useState(40);
-  const scrollViewRef = useRef(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef(null);
   
   // Animation values
@@ -47,13 +43,13 @@ const FilleAI = () => {
   const centerContentMargin = useRef(new Animated.Value(150)).current;
 
   // Function to handle input height changes
-  const updateInputHeight = (height) => {
+  const updateInputHeight = (height: number) => {
     const newHeight = Math.min(Math.max(40, height), 100);
     setInputHeight(newHeight);
   };
 
   // Function to format code blocks with custom renderer
-  const formatMessage = (text) => {
+  const formatMessage = (text: string) => {
     // Use the same marked configuration as in web version
     marked.setOptions({
       highlight: function(code, language) {
@@ -68,7 +64,7 @@ const FilleAI = () => {
   };
 
   // User Message Component
-  const UserMessage = ({ text }) => (
+  const UserMessage = ({ text }: { text: string }) => (
     <View style={{ alignSelf: 'flex-end', maxWidth: '80%', marginVertical: 8 }}>
       <View style={{ 
         backgroundColor: '#24273A', 
@@ -76,16 +72,16 @@ const FilleAI = () => {
         borderTopRightRadius: 5,
         padding: 12
       }}>
-        <Text style={{ color: 'white', fontFamily: 'Outfit-Regular', fontSize: 16 }}>{text}</Text>
+        <Text style={{ color: 'white', fontSize: 16 }}>{text}</Text>
       </View>
     </View>
   );
 
   // Computer Message Component with Markdown support
-  const ComputerMessage = ({ text }) => {
-    const [copiedIndex, setCopiedIndex] = useState(null);
+  const ComputerMessage = ({ text }: { text: string }) => {
+    const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-    const handleCopyCode = async (code, index) => {
+    const handleCopyCode = async (code: string, index: number) => {
       await Clipboard.setStringAsync(code);
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
@@ -94,26 +90,25 @@ const FilleAI = () => {
     const markdownStyles = {
       body: {
         color: 'white',
-        fontFamily: 'Outfit-Regular',
         fontSize: 16,
         lineHeight: 24,
       },
       heading1: {
-        fontFamily: 'Outfit-Bold',
+        fontWeight: 'bold',
         fontSize: 22,
         marginTop: 8,
         marginBottom: 4,
         color: 'white',
       },
       heading2: {
-        fontFamily: 'Outfit-Bold',
+        fontWeight: 'bold',
         fontSize: 20,
         marginTop: 8,
         marginBottom: 4,
         color: 'white',
       },
       heading3: {
-        fontFamily: 'Outfit-Bold',
+        fontWeight: 'bold',
         fontSize: 18,
         marginTop: 8,
         marginBottom: 4,
@@ -121,7 +116,7 @@ const FilleAI = () => {
       },
       link: {
         color: '#fff',
-        textDecorationLine: 'underline',
+        textDecorationLine: "underline" as "underline",
       },
       blockquote: {
         borderLeftWidth: 3,
@@ -149,7 +144,7 @@ const FilleAI = () => {
     };
 
     // Custom renderer for code blocks
-    const renderCodeBlock = (props) => {
+    const renderCodeBlock = (props: { content: string; language?: string; index: number }) => {
       const { content, language } = props;
       return (
         <View style={{
@@ -217,8 +212,8 @@ const FilleAI = () => {
               code_block: (node, children, parent, styles, renderContent) => {
                 return renderCodeBlock({
                   content: node.content,
-                  language: node.language,
-                  index: node.key,
+                  language: (node as any).language,
+                  index: (node as any).key,
                 });
               }
             }}
@@ -291,7 +286,7 @@ const FilleAI = () => {
 
     try {
       // Send request to server
-      const response = await fetch("http://localhost:8000/chat/", {
+      const response = await fetch("http://192.168.205.117:8000/chat/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -327,18 +322,12 @@ const FilleAI = () => {
   useEffect(() => {
     if (scrollViewRef.current && messages.length > 0) {
       setTimeout(() => {
-        scrollViewRef.current.scrollToEnd({ animated: true });
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({ animated: true });
+        }
       }, 100);
     }
   }, [messages]);
-
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1C25' }}>
-        <Text style={{ color: 'white' }}>Loading...</Text>
-      </View>
-    );
-  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -347,12 +336,12 @@ const FilleAI = () => {
         
         {/* Navbar */}
         <View style={{ padding: 20 }}>
-          <Text style={{ color: 'white', fontFamily: 'Outfit-Bold', fontSize: 17 }}>FILLE AI</Text>
+          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17 }}>FILLE AI</Text>
         </View>
         
         {/* Main Content */}
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : null}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
         >
@@ -370,7 +359,7 @@ const FilleAI = () => {
                 }}>
                   <Text style={{ 
                     color: 'white', 
-                    fontFamily: 'Outfit-Bold', 
+                    fontWeight: 'bold', 
                     fontSize: 24,
                     textAlign: 'center'
                   }}>
@@ -378,7 +367,6 @@ const FilleAI = () => {
                   </Text>
                   <Text style={{ 
                     color: 'white', 
-                    fontFamily: 'Outfit-Regular',
                     fontSize: 16,
                     marginTop: 8,
                     textAlign: 'center'
@@ -424,7 +412,6 @@ const FilleAI = () => {
                 style={{
                   flex: 1,
                   color: 'white',
-                  fontFamily: 'Outfit-Regular',
                   fontSize: 16,
                   paddingVertical: 12,
                   paddingHorizontal: 8,
