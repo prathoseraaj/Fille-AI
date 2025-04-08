@@ -22,12 +22,17 @@ import { marked } from 'marked';
 import highlightjs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
+import { Link, router, useRouter } from 'expo-router';
+
 
 // Register commonly used languages
 highlightjs.registerLanguage('javascript', javascript);
 highlightjs.registerLanguage('python', python);
 
 const FilleAI = () => {
+
+  const router = useRouter();
+
   // Removed custom font loading
   
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
@@ -443,6 +448,17 @@ const FilleAI = () => {
           <Text style={{ color: 'grey', fontSize: 12 }}>
             Fille AI is not infallible. Gasp! Cross-check significant information!
           </Text>
+          <TouchableOpacity 
+      onPress={() => {
+        //@ts-ignore
+        router.push("/realchat");
+      }}
+      style={{ padding: 20 }}
+    >
+      <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
+        Open RealChat
+      </Text>
+    </TouchableOpacity>
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
