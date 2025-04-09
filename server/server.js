@@ -223,7 +223,7 @@ io.on('connection', (socket) => {
         const doctorSocket = activeUsers.get(MAIN_DOCTOR_ID);
         if (doctorSocket) {
           doctorSocket.emit('patientUpdated', patientInfo);
-        }
+        }   
       }
     }
   });
