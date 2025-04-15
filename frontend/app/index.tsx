@@ -12,7 +12,8 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   Platform,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Alert
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -23,24 +24,21 @@ import highlightjs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
 import { Link, router, useRouter } from 'expo-router';
-
+import Constants from 'expo-constants';
 
 // Register commonly used languages
 highlightjs.registerLanguage('javascript', javascript);
 highlightjs.registerLanguage('python', python);
 
 const FilleAI = () => {
-
   const router = useRouter();
-
-  // Removed custom font loading
   
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<{ type: string; text: string }[]>([]);
   const [inputText, setInputText] = useState('');
   const [inputHeight, setInputHeight] = useState(40);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef(null);
   const inputRef = useRef(null);
   
   // Animation values
@@ -55,7 +53,6 @@ const FilleAI = () => {
 
   // Function to format code blocks with custom renderer
   const formatMessage = (text: string) => {
-    // Use the same marked configuration as in web version
     marked.setOptions({
       highlight: function(code, language) {
         if (language && highlightjs.getLanguage(language)) {
@@ -121,7 +118,7 @@ const FilleAI = () => {
       },
       link: {
         color: '#fff',
-        textDecorationLine: "underline" as "underline",
+        textDecorationLine: "underline",
       },
       blockquote: {
         borderLeftWidth: 3,
@@ -212,13 +209,13 @@ const FilleAI = () => {
           padding: 12
         }}>
           <Markdown 
-            style={markdownStyles}
+            style={markdownStyles as any}
             rules={{
               code_block: (node, children, parent, styles, renderContent) => {
                 return renderCodeBlock({
                   content: node.content,
                   language: (node as any).language,
-                  index: (node as any).key,
+                  index: parseInt(node.key, 10),
                 });
               }
             }}
@@ -258,6 +255,28 @@ const FilleAI = () => {
     </View>
   );
 
+  // Get server URL based on environment
+  const getServerUrl = () => {
+    // When running in Expo Go on a physical device, use your computer's IP
+    if (Constants.appOwnership === 'expo' && !__DEV__) {
+      // For production builds
+      return "https://your-production-server.com/chat/";
+    } else if (Platform.OS === 'web') {
+      // For web, use relative URL
+      return "/chat/";
+    } else if (Platform.OS === 'android') {
+      // Android emulator can access host machine via 10.0.2.2
+      return "http://10.0.2.2:8000/chat/";
+    } else if (Platform.OS === 'ios') {
+      // iOS simulator can access host machine via localhost
+      return "http://localhost:8000/chat/";
+    } else {
+      // Physical device - use your computer's IP address on the local network
+      // This should be updated with your actual IP
+      return "http://192.168.1.X:8000/chat/";
+    }
+  };
+
   // Handler for chat submit
   const handleSubmit = async () => {
     if (inputText.trim() === '' || isLoading) return;
@@ -290,8 +309,11 @@ const FilleAI = () => {
     setIsLoading(true);
 
     try {
+      const serverUrl = getServerUrl();
+      console.log(`Sending request to: ${serverUrl}`);
+      
       // Send request to server
-      const response = await fetch("http://192.168.205.117:8000/chat/",  {
+      const response = await fetch(serverUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -314,9 +336,14 @@ const FilleAI = () => {
       setMessages(prevMessages => [...prevMessages, { type: 'computer', text: aiResponse }]);
     } catch (error) {
       console.error('Error:', error);
+      Alert.alert(
+        "Connection Error",
+        `Failed to connect to server: ${(error as Error).message}\n\nMake sure your server is running and the device can reach it.`,
+        [{ text: "OK" }]
+      );
       setMessages(prevMessages => [
         ...prevMessages,
-        { type: 'computer', text: 'Sorry, there was an error processing your request.' },
+        { type: 'computer', text: 'Sorry, there was an error processing your request. Please check your network connection and make sure the server is running.' },
       ]);
     } finally {
       setIsLoading(false);
@@ -328,7 +355,7 @@ const FilleAI = () => {
     if (scrollViewRef.current && messages.length > 0) {
       setTimeout(() => {
         if (scrollViewRef.current) {
-          scrollViewRef.current.scrollToEnd({ animated: true });
+          (scrollViewRef.current as ScrollView).scrollToEnd({ animated: true });
         }
       }, 100);
     }
@@ -391,10 +418,10 @@ const FilleAI = () => {
                 contentContainerStyle={{ paddingBottom: 16 }}
               >
                 {messages.map((message, index) => (
-                  message.type === 'user' ? (
-                    <UserMessage key={index} text={message.text} />
+                  (message as { type: string; text: string }).type === 'user' ? (
+                    <UserMessage key={index} text={(message as { type: string; text: string }).text} />
                   ) : (
-                    <ComputerMessage key={index} text={message.text} />
+                    <ComputerMessage key={index} text={(message as { type: string; text: string }).text} />
                   )
                 ))}
                 {isLoading && <LoadingIndicator />}
@@ -449,16 +476,15 @@ const FilleAI = () => {
             Fille AI is not infallible. Gasp! Cross-check significant information!
           </Text>
           <TouchableOpacity 
-      onPress={() => {
-        //@ts-ignore
-        router.push("/realchat");
-      }}
-      style={{ padding: 20 }}
-    >
-      <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
-        Open RealChat
-      </Text>
-    </TouchableOpacity>
+            onPress={() => {
+              router.push("/realchat");
+            }}
+            style={{ padding: 20 }}
+          >
+            <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
+              Open RealChat
+            </Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
