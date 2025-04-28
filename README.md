@@ -45,7 +45,7 @@ Fille AI is an AI-powered chatbot focused on women's health, providing clear, fa
 1. Clone the repository:
    ```bash
    git clone https://github.com/Fille-AI.git
-   cd your-repository
+   cd Fille-AI
    ```
 
 2. Install dependencies:
