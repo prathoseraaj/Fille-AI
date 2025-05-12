@@ -15,6 +15,7 @@ Fille AI is an AI-powered chatbot focused on women's health, providing clear, fa
 - Integrates Groq AI for generating human-like responses
 - Backend powered by Node.js for real-time communication with certified doctors
 - Supports real-time chat functionality for escalated health concerns
+- [Doctor UI](https://github.com/prathoseraaj/react-native-doctor-ui.git)
 
 ## Technologies Used
 
