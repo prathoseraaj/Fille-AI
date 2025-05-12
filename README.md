@@ -148,8 +148,5 @@ The idea behind Fille AI was to create an accessible, AI-driven health assistant
 
 ## License
 
-[MIT License](LICENSE)
-
-## License
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
 
